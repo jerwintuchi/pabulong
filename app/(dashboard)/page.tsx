@@ -1,4 +1,3 @@
-import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 import { InfoIcon } from "lucide-react";
@@ -24,7 +23,7 @@ export default async function ProtectedPage() {
           This is a protected page that you can only see as an authenticated
           user
         </div>
-        <form action={signOutAction}>
+        <form action={signOutAction} className="mt-4">
           <Button type="submit" variant={"outline"}>
             Sign out
           </Button>
@@ -37,8 +36,6 @@ export default async function ProtectedPage() {
         </pre>
       </div>
       <div>
-        <h2 className="font-bold text-2xl mb-4">Next steps</h2>
-        <FetchDataSteps />
       </div>
     </div>
   );
