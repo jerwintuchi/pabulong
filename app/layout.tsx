@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { GiLips } from "react-icons/gi";
 import "./globals.css";
+import Header from "@/components/Header";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -35,19 +36,7 @@ export default function RootLayout({
         >
           <main className="min-h-screen flex flex-col items-center w-full">
             <div className="flex-1 w-full flex flex-col gap-20 items-center">
-              {/* Navigation Bar */}
-              <nav className="w-full border-b flex flex-row items-center h-16 px-8">
-                <GiLips size={36} />
-                {/* Left - App Title */}
-                <div className="font-semibold text-4xl">
-                  <a href={defaultUrl}>Pabulong</a>
-                </div>
-
-                {/* Push ThemeSwitcher to the right */}
-                <div className="ml-auto">
-                  <ThemeSwitcher />
-                </div>
-              </nav>
+              <Header />
 
               {/* Main Content */}
               <div className="flex flex-col gap-20 max-w-5xl p-5">

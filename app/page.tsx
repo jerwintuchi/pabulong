@@ -1,6 +1,7 @@
 
 import Hero from "@/components/Hero";
 import FeatureSection from "./public/_components/FeatureSection";
+import { Button } from "@/components/ui/button";
 
 export default async function Home() {
   return (
@@ -17,9 +18,9 @@ export default async function Home() {
           <p className="text-lg mb-8">
             Try Pabulong today and start messaging securely and privately.
           </p>
-          <button className="bg-blue-600 text-white text-lg py-3 px-6 rounded-full hover:bg-blue-700 transition duration-300">
+          <Button className="bg-blue-600 text-white text-lg py-3 px-6 rounded-full hover:bg-blue-700 transition duration-300">
             <a href="sign-up">Get Started Now</a>
-          </button>
+          </Button>
         </section>
       </main>
     </>
