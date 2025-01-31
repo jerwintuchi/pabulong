@@ -33,7 +33,7 @@ export default function Header() {
                         </a>
                     </Button>) :
                         (
-                            route === "/sign-up" ? (<Button className='text-sm bg-white text-black hover:bg-gray-300 dark:bg-white dark:text-black  dark:hover:bg-gray-200'>
+                            route === "/sign-up" || route === "/" ? (<Button className='text-sm bg-white text-black hover:bg-gray-300 dark:bg-white dark:text-black  dark:hover:bg-gray-200'>
                                 <a href={"/sign-up"}>
                                     Sign Up
                                 </a>
