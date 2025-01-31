@@ -8,7 +8,7 @@ const defaultUrl = process.env.VERCEL_URL
 7
 export default function Header() {
     return (
-        <div className="sticky bg-black top-0 z-50 flex-1 w-full flex flex-col gap-20 items-center">
+        <div className="sticky bg-black top-0 z-50 w-full">
             {/* Navigation Bar */}
             <div className="w-full border-b flex flex-row items-center h-16 px-8">
                 <GiLips size={36} />
