@@ -2,15 +2,11 @@ import { signOutAction } from "@/app/actions";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { createClient } from "@/utils/supabase/server";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
+import { getUserAuthState } from "@/utils/supabase/getUserAuthState";
 
 export default async function AuthButton() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getUserAuthState();
 
   if (!hasEnvVars) {
     return (

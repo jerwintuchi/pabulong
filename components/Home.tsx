@@ -1,6 +1,6 @@
 
 import Hero from "@/components/Hero";
-import FeatureSection from "./public/_components/FeatureSection";
+import FeatureSection from "../app/public/_components/FeatureSection";
 import { Button } from "@/components/ui/button";
 
 export default async function Home() {
