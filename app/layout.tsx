@@ -1,9 +1,9 @@
-import { ThemeSwitcher } from "@/components/theme-switcher";
+
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import { GiLips } from "react-icons/gi";
 import "./globals.css";
 import Header from "@/components/Header";
+import { getUser } from "@/utils/queries/queryDefinitions";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -20,12 +20,14 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
+
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
         <ThemeProvider
@@ -47,5 +49,6 @@ export default function RootLayout({
         </ThemeProvider>
       </body >
     </html >
+
   );
 }

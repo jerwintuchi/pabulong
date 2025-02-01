@@ -12,19 +12,20 @@ export const signUpAction = async (formData: FormData) => {
   const supabase = await createClient();
   // Check if username is unique
 
-  const { data: ExistingUser, error: userNameError } = await supabase
+  const { data: existingUser, error: userNameError } = await supabase
     .from("profiles")
     .select("username")
     .eq("username", username)
     .single();
 
-  if (ExistingUser) {
+  if (existingUser) {
     return encodedRedirect(
       "error",
       "/sign-up",
       "That username is already taken, try another one."
     );
   }
+  console.log(existingUser);
 
   if (!username || username.length > 12) {
     return encodedRedirect(
@@ -60,11 +61,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-up", userError.message);
   }
 
-  return encodedRedirect(
-    "success",
-    "/sign-up",
-    "Thanks for signing up! Please check your email for a verification link."
-  );
+  return redirect("/");
 };
 
 export const signInAction = async (formData: FormData) => {

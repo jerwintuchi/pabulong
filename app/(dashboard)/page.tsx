@@ -1,32 +1,40 @@
-import { getUserAuthState } from "@/utils/supabase/getUserAuthState";
-import { Button } from "@/components/ui/button";
-
-import Link from "next/link";
+import React from "react";
+import HomePageClient from "./_components/HomePageClient";
 import Home from "@/components/Home";
-import { signOutAction } from "../actions";
+import { getPendingFriendRequests, getSecretMessage, getUser, getUserFriends, getUserName } from "@/utils/queries/queryDefinitions";
+import { UserType } from "../types/definitions";
 
+
+
+// The HomePage component
 export default async function HomePage() {
-    const user = await getUserAuthState();
 
-    if (user) {
-        // Authenticated User → Show Dashboard
-        return (
-            <div className="p-4">
-                <h1 className="text-xl font-bold">Welcome to Your Dashboard</h1>
-                <nav className="mt-4">
-                    <Link href="/page1" className="mr-4">Page 1</Link>
-                    <Link href="/page2" className="mr-4">Page 2</Link>
-                    <Link href="/page3">Page 3</Link>
-                </nav>
-                <form action={signOutAction} className="mt-4">
-                    <Button type="submit" variant="outline">Sign out</Button>
-                </form>
-            </div>
-        );
+    // Check user authentication state
+    const isAuthenticated = await getUser();
+    console.log("isAuthenticated", isAuthenticated)
+    // If not authenticated, render Home component
+    if (!isAuthenticated) {
+        return <Home />;
     }
+    // If authenticated, fetch user data
+    const user = await getUser(); // Assuming getUser() returns the full user data
+    const username = await getUserName(); // Assuming user.id is available
+    const secretMessage = await getSecretMessage();
+    const friends = await getUserFriends(); // Assuming `user.friends` is an array
+    const pendingRequests = await getPendingFriendRequests(); // Assuming `user.pendingRequests` is an array
 
-    // Unauthenticated User → Show Landing Page
-    return (
-        <Home />
-    );
+    // Combine all the data into a single object of type UserType
+    const userData: UserType = {
+        user: user,
+        username: username,
+        secretMessage: secretMessage,
+        friends: friends,
+        pendingRequests: pendingRequests,
+    };
+
+    // Render the HomePageClient with the user data as props
+    return <HomePageClient user={userData} />;
+
 }
+
+
