@@ -6,11 +6,33 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
+  const username = formData.get("username")?.toString()?.trim();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  // Check if username is unique
 
+  const { data: ExistingUser, error: userNameError } = await supabase
+    .from("profiles")
+    .select("username")
+    .eq("username", username)
+    .single();
+
+  if (ExistingUser) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "That username is already taken, try another one."
+    );
+  }
+
+  if (!username || username.length > 12) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Username must be 12 characters or less"
+    );
+  }
   if (!email || !password) {
     return encodedRedirect(
       "error",
@@ -19,24 +41,30 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  });
+  const { error, data } = await supabase.auth.signUp({ email, password });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
+  if (!data) {
+    return encodedRedirect("error", "/sign-up", "Something went wrong");
   }
+
+  const { error: userError } = await supabase.from("profiles").insert([
+    {
+      username,
+      user_id: data.user?.id,
+      email,
+    },
+  ]);
+
+  if (userError) {
+    console.error(userError.code + " " + userError.message);
+    return encodedRedirect("error", "/sign-up", userError.message);
+  }
+
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {

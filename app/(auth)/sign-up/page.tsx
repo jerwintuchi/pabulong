@@ -23,6 +23,15 @@ export default async function Signup(props: {
       <form className="flex flex-col min-w-64 max-w-64 mx-auto">
         <h1 className="text-2xl font-medium">Sign up</h1>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+          {/*-----------------USERNAME ------------------------ */}
+          <Label htmlFor="username">Username</Label>
+          <Input
+            name="username"
+            placeholder="Your username"
+            maxLength={12}  // Prevent users from entering more than 12 chars
+            required
+          />
+          {/*-----------------EMAIL AND PASSWORD ------------------------ */}
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" required />
           <Label htmlFor="password">Password</Label>
