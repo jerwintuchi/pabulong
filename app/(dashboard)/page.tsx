@@ -1,9 +1,9 @@
-// app/(dashboard)/page.tsx
+
 import React from "react";
 import HomePageClient from "./_components/HomePageClient";
 import Home from "@/components/Home";
-import { getPendingFriendRequests, getSecretMessage, getUser, getUserFriends, getUserName } from "@/utils/queries/queryDefinitions";
-import { UserType } from "../types/definitions";
+import { getUser } from "@/utils/queries/queryDefinitions";
+
 
 
 
@@ -12,7 +12,7 @@ export default async function HomePage() {
 
     // Check user authentication state
     const isAuthenticated = await getUser();
-    //console.log("isAuthenticated", isAuthenticated)
+    /*//console.log("isAuthenticated", isAuthenticated)
     // If not authenticated, render Home component
     if (isAuthenticated) {
         // If authenticated, fetch user data
@@ -24,7 +24,7 @@ export default async function HomePage() {
             secret_message: null, // or any default value
         }));
         const pendingRequests = (await getPendingFriendRequests()).filter((req) => req !== null);
-
+ 
         // Combine all the data into a single object of type UserType
         const userData: UserType = {
             user: user,
@@ -32,10 +32,10 @@ export default async function HomePage() {
             secretMessage: secretMessage,
             friends: friends,
             pendingRequests: pendingRequests,
-        };
-
+        }; */
+    if (isAuthenticated) {
         // Render the HomePageClient with the user data as props
-        return <HomePageClient user={userData} />;
+        return <HomePageClient />;
     }
 
     // If not authenticated, render Home component

@@ -1,8 +1,6 @@
 "use server";
 
-import { DeleteAccountResponse } from "@/app/types/definitions";
 import { createClient } from "../supabase/server";
-
 export const getUser = async () => {
   const supabase = await createClient();
   const {

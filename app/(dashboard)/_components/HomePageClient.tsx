@@ -2,16 +2,12 @@
 "use client"; // This marks the file as a client-side component
 
 import React from "react";
-import { usePathname } from "next/navigation";
 
 import { UserType } from "@/app/types/definitions";
 import SignOutButton from "@/components/buttons/signout-button";
 import DeleteAccountButton from "@/components/buttons/delete-account-button";
-import NavLinks from "@/components/NavLinks";
 
-interface HomePageClientProps {
-    user: UserType;
-}
+import { useUser } from "@/contexts/UserContext";
 
 const sideNavLinks = [
     { href: "/secret-page-1", label: "🔒 Secret Page 1" },
@@ -19,8 +15,14 @@ const sideNavLinks = [
     { href: "/secret-page-3", label: "👥 Secret Page 3" },
 ];
 
-export default function HomePageClient({ user }: HomePageClientProps) {
-    const pathname = usePathname();
+export default function HomePageClient() {
+    const userData = useUser();  // Access user data from context
+
+    if (!userData) {
+        console.log("USER DATA IS NULL");
+    }
+    
+    const user = userData as UserType;
 
     return (
         <div className="relative flex justify-center mt-20">
