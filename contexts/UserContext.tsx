@@ -1,98 +1,81 @@
-/* "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+/* // context/AuthContext.tsx
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { getUser, getUserName, getSecretMessage, getUserFriends, getPendingFriendRequests } from "@/utils/queries/queryDefinitions";
 import { User } from "@supabase/supabase-js";
-import { createClient } from "@/utils/supabase/client";
-import { getUserProfile, getFriendsSecretMessages, getUserFriends, getPendingFriendRequests, getUserName } from "@/utils/queries/queryDefinitions";
 
-const supabase = createClient();
-
-// Define the User Context type
-interface UserContextType {
-    user: User | null;
+// Define the shape of the user data
+export interface UserData {
+    user: User | null; // Replace with actual user type
     username: string | null;
-    secretMessage: string | null;
-    friends: { user_id: string | null; secret_message: string | null }[];
-    pendingRequests: string[];
-    loading: boolean;
+    secretMessage: string | null | undefined;
+    friends: Array<{ user_id: string | null; secret_message: string | null }>;
+    pendingRequests: any[]; // Replace with actual request type
 }
 
-// Initialize User Context with default values
-const UserContext = createContext<UserContextType | undefined>(undefined);
+interface AuthContextType {
+    userData: UserData | null;
+    isAuthenticated: boolean;
+    loading: boolean;
+    fetchUserData: () => Promise<void>;
+}
 
-// User Context Provider Component
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [secretMessage, setSecretMessage] = useState<string | null>(null);
-    const [friends, setFriends] = useState<{ user_id: string | null; secret_message: string | null; }[]>([]);
-    const [pendingRequests, setPendingRequests] = useState<string[]>([]);
-    const [username, setUsername] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+// Create context with default values
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data: { user }, error } = await supabase.auth.getUser();
-
-            if (error || !user) {
-                console.log("No user logged in or error fetching user data.");
-                setLoading(false);
-                return;
-            }
-
-            const currentUser = await supabase.from("profiles").select("user_id").eq("user_id", user.id).single();
-            console.log(user.id)
-            console.log("Current user: ", currentUser);
-            const { user_id: userId } = currentUser.data || {};
-
-            if (!userId) {
-                console.log("User ID not found in profiles table.");
-                setLoading(false);
-                return;
-            }
-            try {
-                const username = await getUserName(userId);
-                if (username) {
-                    setUsername(username);
-                }
-
-                const profileSecretMessage = await getUserProfile(userId);
-                if (profileSecretMessage) {
-                    setSecretMessage(profileSecretMessage);
-                } else {
-                    console.log("Profile not found for the user");
-                }
-
-                const friendIds = await getUserFriends(user.id);
-                setFriends(await getFriendsSecretMessages(friendIds.map((id: string) => id ?? '')));
-
-                const pendingRequestsData = (await getPendingFriendRequests(user.id))?.filter((id: string) => id !== null) || [];
-                setPendingRequests(pendingRequestsData);
-
-                setUser(user); // Ensure the user state is set here
-            } catch (fetchError) {
-                console.log("Error fetching data: ", fetchError);
-            }
-
-            setLoading(false);
-        };
-
-        fetchData(); // Ensure fetchData is executed when the component mounts
-
-    }, []);
-
-
-    return (
-        <UserContext.Provider value={{ user, secretMessage, friends, pendingRequests, username, loading }}>
-            {children}
-        </UserContext.Provider>
-    );
-};
-
-// Custom hook to access the user context
-export const useUser = (): UserContextType => {
-    const context = useContext(UserContext);
+// Custom hook to use the AuthContext
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
     if (!context) {
-        throw new Error("useUser must be used within a UserProvider");
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
+
+    // Fetch user data and set it in state
+    const fetchUserData = async () => {
+        try {
+            const user = await getUser();
+            if (user) {
+                const username = await getUserName();
+                const secretMessage = await getSecretMessage();
+                const friends = (await getUserFriends()).map((friendId: string | null) => ({
+                    user_id: friendId,
+                    secret_message: null,
+                }));
+                const pendingRequests = (await getPendingFriendRequests()).filter((req) => req !== null);
+
+                setUserData({
+                    user,
+                    username,
+                    secretMessage,
+                    friends,
+                    pendingRequests,
+                });
+                setIsAuthenticated(true);
+            } else {
+                setIsAuthenticated(false);
+            }
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+            setIsAuthenticated(false);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, []);
+
+    return (
+        <AuthContext.Provider value={{ userData, isAuthenticated, loading, fetchUserData }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
  */
