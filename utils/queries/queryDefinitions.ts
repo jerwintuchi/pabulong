@@ -62,7 +62,6 @@ export const updateSecretMessage = async (
   const username = await getUserName();
   if (!username) return "User not logged in.";
   const profileData = {
-    id: data?.user.id,
     user_id: data?.user.id,
     username: username,
     email: data.user.email!, // Assert that email is not null or undefined

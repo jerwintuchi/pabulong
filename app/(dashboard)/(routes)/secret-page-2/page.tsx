@@ -38,9 +38,12 @@ const SecretPage2 = () => {
       <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
         Secret Page 2
       </h1>
-      <p className="text-center text-gray-500">Username: {user?.username}</p>
-
-      <form action={formAction} className="mt-4">
+      <p className="text-center text-gray-500 pb-4">Username: {user?.username}</p>
+      <div className="text-sm text-gray-200 p-4 border border-zinc-50 rounded-sm">
+        My Secret Message:
+        <span className="text-teal-400 pl-2">{secretMessage || "No message yet."}</span>
+      </div>
+      <form action={formAction} className="mt-12">
         <label htmlFor="message" className="block text-sm font-medium">
           Update Secret Message:
         </label>
