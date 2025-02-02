@@ -7,3 +7,10 @@ export interface UserType {
   friends: { user_id: string | null; secret_message: string | null }[];
   pendingRequests: string[];
 }
+
+export type serviceRoleKey = string;
+
+export type DeleteAccountResponse = {
+  // Modify response structure if updated
+  success: boolean;
+};

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "postcss";
+import { handleDeleteAccount } from "@/utils/queries/queryDefinitions";
 
 interface CustomStyleProps extends React.HTMLAttributes<HTMLButtonElement> {
     customStyle?: string
@@ -11,7 +11,7 @@ interface CustomStyleProps extends React.HTMLAttributes<HTMLButtonElement> {
 
 export default function DeleteAccountButton() {
     const [open, setOpen] = useState(false);
-    const [checked, setChecked] = useState(true);
+    const [checked, setChecked] = useState(false);
 
     const dummyHandleDeleteAccount = async () => {
         console.log("ACCOUNT DELETED");
@@ -42,7 +42,7 @@ export default function DeleteAccountButton() {
                     <Button variant="outline" onClick={() => setOpen(false)}>
                         Cancel
                     </Button>
-                    <Button disabled={checked} variant="destructive" onClick={dummyHandleDeleteAccount}>
+                    <Button disabled={!checked} variant="destructive" onClick={handleDeleteAccount}>
                         Yes, Delete
                     </Button>
                 </DialogFooter>

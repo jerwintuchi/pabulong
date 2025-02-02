@@ -1,5 +1,6 @@
 "use server";
 
+import { DeleteAccountResponse } from "@/app/types/definitions";
 import { createClient } from "../supabase/server";
 
 export const getUser = async () => {
@@ -54,6 +55,9 @@ export const getUserProfile = async (userId: string) => {
 export const getUserFriends = async () => {
   const supabase = await createClient();
   const user = await getUser();
+  if (!user) {
+    return [];
+  }
   const { data, error } = await supabase
     .from("friendships")
     .select("friend_id, status")
@@ -91,6 +95,9 @@ export const getPendingFriendRequests = async () => {
   const supabase = await createClient();
   const user = await getUser();
 
+  if (!user) {
+    throw new Error("User not logged in");
+  }
   const { data, error } = await supabase
     .from("friendships")
     .select("user_id")
@@ -108,6 +115,9 @@ export const getPendingFriendRequests = async () => {
 export const getUserName = async () => {
   const supabase = await createClient();
   const user = await getUser();
+  if (!user) {
+    throw new Error("User not logged in");
+  }
   const { data, error } = await supabase
     .from("profiles")
     .select("username")
@@ -123,10 +133,33 @@ export const getUserName = async () => {
 };
 
 export const handleDeleteAccount = async () => {
-  const supabase = await createClient();
-  const user = await getUser();
-  if (!user) return;
+  const service_role_key = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY;
+  if (!service_role_key) {
+    throw new Error("Service role key not found");
+  }
 
-  await supabase.from("profiles").delete().eq("user_id", user.id);
+  const supabase = await createClient(service_role_key);
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) {
+    console.error("User not logged in");
+    throw new Error("User not logged in");
+  }
+  try {
+    let { data, error } = await supabase.rpc("delete_own_account");
+
+    if (error) {
+      console.error(
+        "Error deleting user....",
+        "ERROR CODE: " + error.code,
+        " ERROR MESSAGE: ",
+        error.message
+      );
+    } else {
+      console.log("Account successfully deleted - ", data);
+    }
+  } catch (error) {
+    console.error("Cannot delete user", error);
+  }
+
   await supabase.auth.signOut();
 };

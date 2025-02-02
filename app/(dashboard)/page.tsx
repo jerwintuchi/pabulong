@@ -11,7 +11,7 @@ export default async function HomePage() {
 
     // Check user authentication state
     const isAuthenticated = await getUser();
-    console.log("isAuthenticated", isAuthenticated)
+    //console.log("isAuthenticated", isAuthenticated)
     // If not authenticated, render Home component
     if (isAuthenticated) {
         // If authenticated, fetch user data

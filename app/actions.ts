@@ -11,7 +11,9 @@ export const signUpAction = async (formData: FormData) => {
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
   // Check if username is unique
-
+  if (!username) {
+    return encodedRedirect("error", "/sign-up", "Username is required");
+  }
   const { data: existingUser, error: userNameError } = await supabase
     .from("profiles")
     .select("username")
