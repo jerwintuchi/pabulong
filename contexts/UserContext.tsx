@@ -1,56 +1,58 @@
 "use client";
+
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getPendingFriendRequests, getSecretMessage, getUser, getUserFriends, getUserName } from "@/utils/queries/queryDefinitions";
+import {
+    getPendingFriendRequests,
+    getSecretMessage,
+    getUser,
+    getUserFriends,
+    getUserName
+} from "@/utils/queries/queryDefinitions";
 import { UserType } from "@/app/types/definitions";
 
+// Define context type
+interface UserContextType {
+    user: UserType | null;
+    loading: boolean;
+}
 
-// Create the context
-const UserContext = createContext<UserType | null>(null);
+// Create context with default values
+const UserContext = createContext<UserContextType>({ user: null, loading: true });
 
-// Provider component to wrap the app
+// Provider component
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [userData, setUserData] = useState<UserType | null>(null);
+    const [user, setUser] = useState<UserType | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
-            /* const isAuthenticated = await getUserClient(); */
-            const isAuthenticated = await getUser();
+            try {
+                const userData = await getUser();
+                if (!userData) return;
 
-            if (isAuthenticated) {
-                const [user, username, secretMessage, friendsRaw, pendingRequests] = await Promise.all([
-                    getUser(),
+                const [username, secretMessage, friendsRaw, pendingRequests] = await Promise.all([
                     getUserName(),
                     getSecretMessage(),
                     getUserFriends(),
                     getPendingFriendRequests(),
-                ])
-                /* const user = await getUser();
-                const username = await getUserName();
-                const secretMessage = await getSecretMessage();
-                const friends = (await getUserFriends()).map((friendId: string | null) => ({
-                    user_id: friendId,
-                    secret_message: null, // default value
-                }));
-                const pendingRequests = (await getPendingFriendRequests()).filter((req) => req !== null);
-                    */
-                // Transform friends to match expected structure
+                ]);
+
                 const friends = friendsRaw.map((friendId: string | null) => ({
                     user_id: friendId,
-                    secret_message: null, // Default value
+                    secret_message: null, // Default placeholder
                 }));
 
-                const userData: UserType = {
-                    user,
+                setUser({
+                    user: userData,
                     username,
                     secretMessage,
                     friends,
                     pendingRequests,
-                };
-
-
-                console.log("userData", userData);
-
-                setUserData(userData);
+                });
+            } catch (error) {
+                console.error("Failed to fetch user data", error);
+            } finally {
+                setLoading(false);
             }
         };
 
@@ -58,11 +60,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     return (
-        <UserContext.Provider value={userData}>
+        <UserContext.Provider value={{ user, loading }}>
             {children}
         </UserContext.Provider>
     );
 };
 
-// Custom hook to access the user data context
+// Custom hook
 export const useUser = () => useContext(UserContext);

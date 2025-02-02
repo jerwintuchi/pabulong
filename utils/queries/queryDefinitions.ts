@@ -134,6 +134,31 @@ export const getUserName = async () => {
   return data ? data.username : null;
 };
 
+export const addMessage = async (message: string) => {
+  const supabase = await createClient();
+  const user = await getUser();
+
+  if (!user) {
+    console.log("User not logged in");
+  }
+
+  try {
+    //insert the secret message of the user to the secret_message field on the profiles table
+    const { data, error } = await supabase.from("profiles").update({
+      user_id: user?.id,
+      secret_message: message,
+    });
+
+    if (error) {
+      console.error("Error adding message:", error);
+    } else {
+      console.log("Message added successfully:", data);
+    }
+  } catch (error) {
+    console.error("Error adding message:", error);
+  }
+};
+
 export const handleDeleteAccount = async () => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
