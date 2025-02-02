@@ -41,6 +41,20 @@ export const signUpAction = async (formData: FormData) => {
       "Email and password are required"
     );
   }
+  //if there is already an existing email
+  const { data: existingEmail, error: existingEmailError } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("email", email)
+    .single();
+
+  if (existingEmail) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "That email is already in use, try another one."
+    );
+  }
 
   const { error, data } = await supabase.auth.signUp({ email, password });
 

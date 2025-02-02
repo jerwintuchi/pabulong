@@ -3,7 +3,6 @@
 
 import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/app/actions";
-import { handleDeleteAccount } from "@/utils/queries/queryDefinitions";
 
 export default function SecretPage1() {
 
