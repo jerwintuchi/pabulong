@@ -12,11 +12,15 @@ export const getUser = async () => {
 
 export const getSecretMessage = async () => {
   const supabase = await createClient();
+  const user = await getUser();
+  if (!user) {
+    return null;
+  }
   try {
     const { data, error } = await supabase
       .from("profiles")
       .select("secret_message")
-      .eq("user_id", "5")
+      .eq("user_id", user.id)
       .single();
     return data?.secret_message;
   } catch (error) {
@@ -131,12 +135,7 @@ export const getUserName = async () => {
 };
 
 export const handleDeleteAccount = async () => {
-  const service_role_key = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_KEY;
-  if (!service_role_key) {
-    throw new Error("Service role key not found");
-  }
-
-  const supabase = await createClient(service_role_key);
+  const supabase = await createClient();
   const { data } = await supabase.auth.getUser();
   if (!data.user) {
     console.error("User not logged in");

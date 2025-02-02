@@ -5,7 +5,7 @@ export interface UserType {
   username: string | null;
   secretMessage: string | null | undefined;
   friends: { user_id: string | null; secret_message: string | null }[];
-  pendingRequests: string[];
+  pendingRequests: (string | null)[];
 }
 
 export type serviceRoleKey = string;

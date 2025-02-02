@@ -1,35 +1,24 @@
-// app/(dashboard)/_components/HomePageClient.tsx
-"use client"; // This marks the file as a client-side component
-
-import React from "react";
-
+"use client";
 import { UserType } from "@/app/types/definitions";
-import SignOutButton from "@/components/buttons/signout-button";
 import DeleteAccountButton from "@/components/buttons/delete-account-button";
-
+import SignOutButton from "@/components/buttons/signout-button";
 import { useUser } from "@/contexts/UserContext";
-
-const sideNavLinks = [
-    { href: "/secret-page-1", label: "🔒 Secret Page 1" },
-    { href: "/secret-page-2", label: "✍️ Secret Page 2" },
-    { href: "/secret-page-3", label: "👥 Secret Page 3" },
-];
+import { useEffect, useState } from "react";
 
 export default function HomePageClient() {
-    const userData = useUser();  // Access user data from context
+    const user = useUser();
+    const [userState, setUserState] = useState<UserType | null>(user);
 
-    if (!userData) {
-        console.log("USER DATA IS NULL");
-    }
-    
-    const user = userData as UserType;
+    useEffect(() => {
+        setUserState(user);
+    }, [user]); // ✅ Now updates when `user` changes
 
     return (
         <div className="relative flex justify-center mt-20">
             {/* Main Content */}
             <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700">
                 <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
-                    Hi, {user.username}!
+                    Hi, {userState?.username}!
                 </h1>
 
                 {/* Centered Buttons */}
