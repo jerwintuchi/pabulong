@@ -58,6 +58,7 @@ export default function Page() {
     // Filter out the current user from allUsers list
     const filteredUsers = allUsers?.filter(u => u.user_id !== user?.user?.id) ?? [];
 
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700 mt-10">
             <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
@@ -79,7 +80,8 @@ export default function Page() {
 
             {/* Card 4: Scrollable List of All Users (excluding current user) */}
             {filteredUsers.length > 0 ? (
-                <ScrollableUserList users={filteredUsers} />
+                <ScrollableUserList users={filteredUsers} friends={friends} />
+
             ) : (
                 <div className="text-center text-gray-500 dark:text-gray-400 mt-4">No users available...</div>
             )}

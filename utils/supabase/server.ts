@@ -1,9 +1,8 @@
-import { serviceRoleKey } from "@/app/types/definitions";
 import { Database } from "@/app/types/supabase";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export const createClient = async (serviceRoleKey?: serviceRoleKey) => {
+export const createClient = async () => {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(

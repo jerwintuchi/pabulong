@@ -9,7 +9,7 @@ import { BsFillSendFill } from "react-icons/bs";
 
 const SecretPage2 = () => {
   const { user, dispatch, loading } = useUser();
-  const secretMessage = user.secretMessage || "You don't have a secret message yet. Add some friends!";
+  const secretMessage = user.secretMessage || "You don't have a secret message yet.";
 
 
   const [status, formAction] = useActionState(updateSecretMessage, null);

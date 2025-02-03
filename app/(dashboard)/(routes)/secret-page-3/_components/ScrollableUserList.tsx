@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { sendFriendRequest } from "@/utils/queries/queryDefinitions";
-import toast from "react-hot-toast";  // Make sure this is correctly imported
+import toast from "react-hot-toast";
 import { IoMdPersonAdd } from "react-icons/io";
 
 interface ScrollableUserListProps {
     users: { id: string; user_id: string; username: string; email: string; secret_message: string }[];
+    friends: { user_id: string | null; secret_message: string | null }[]; // Allow nullable values for user_id and secret_message
 }
 
-const ScrollableUserList: React.FC<ScrollableUserListProps> = ({ users }) => {
-
+const ScrollableUserList: React.FC<ScrollableUserListProps> = ({ users, friends }) => {
     // Handle the friend request click
     const handleFriendRequest = async (userId: string) => {
         const response = await sendFriendRequest(userId);
@@ -24,14 +24,16 @@ const ScrollableUserList: React.FC<ScrollableUserListProps> = ({ users }) => {
         }
     };
 
+    // Filter out accepted friends from the users list
+    const filteredUsers = users.filter(user => !friends.some(friend => friend.user_id === user.user_id));
 
     return (
         <div className="overflow-y-auto max-h-60 border-t border-gray-300 dark:border-gray-700 mt-4">
             <div className="space-y-2 p-4">
-                {users.length === 0 ? (
+                {filteredUsers.length === 0 ? (
                     <p className="text-center text-gray-600 dark:text-gray-400">No users available</p>
                 ) : (
-                    users.map((user, index) => (
+                    filteredUsers.map((user, index) => (
                         <div
                             key={index}
                             className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg shadow-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -41,10 +43,9 @@ const ScrollableUserList: React.FC<ScrollableUserListProps> = ({ users }) => {
                                     <span className="text-gray-600 dark:text-gray-400 pl-4 text-xs">{user.email}</span>
                                 </p>
                                 <div className="flex items-center">
-                                    {/* The user in this context is the user_id on profiles table that is to be added as a friend */}
                                     <IoMdPersonAdd
                                         onClick={() => {
-                                            console.log("Friend Request triggered for user:", user.username);  // Log to confirm it's triggered
+                                            console.log("Friend Request triggered for user:", user.username);
                                             handleFriendRequest(user.user_id);
                                         }}
                                         className="text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400"

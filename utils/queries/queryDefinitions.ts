@@ -337,7 +337,8 @@ export const acceptFriendRequest = async (friendUsername: string) => {
   const supabase = await createClient();
   const user = await getUser();
   if (!user) return null;
-  //fetch the friend's friend_id based on their username
+
+  // Fetch the friend's user_id based on their username
   const { data: friendData, error: friendError } = await supabase
     .from("profiles")
     .select("user_id")
@@ -352,9 +353,10 @@ export const acceptFriendRequest = async (friendUsername: string) => {
     console.error("Friend not found");
     return null;
   }
-  console.log("friendData : ", friendData);
-  //fetch current user's user_id
 
+  console.log("friendData: ", friendData);
+
+  // Fetch current user's user_id
   const { data: userData, error: userError } = await supabase
     .from("profiles")
     .select("user_id")
@@ -371,16 +373,43 @@ export const acceptFriendRequest = async (friendUsername: string) => {
     return null;
   }
 
+  // Check if a pending request exists
+  const { data: friendship, error: friendshipError } = await supabase
+    .from("friendships")
+    .select("id, status")
+    .eq("user_id", friendData.user_id) // Friend sent the request
+    .eq("friend_id", userData.user_id) // Current user received it
+    .single();
+
+  if (friendshipError) {
+    console.error("Error checking existing friendship:", friendshipError);
+    return null;
+  }
+
+  if (!friendship) {
+    console.error("No pending friend request found.");
+    return null;
+  }
+
+  if (friendship.status !== "pending") {
+    console.error("Friend request is not pending.");
+    return null;
+  }
+
   try {
-    const { error } = await supabase
+    // Update the friendship status to 'accepted'
+    const { data, error } = await supabase
       .from("friendships")
       .update({ status: "accepted" })
-      .eq("friend_id", userData.user_id);
-    console.log("Current user's friend_id : ", userData.user_id);
+      .eq("id", friendship.id) // Use the ID of the friendship entry
+      .select(); // Ensure the updated row is returned
+
     if (error) {
       console.error("Error accepting friend request:", error);
       return null;
     }
+
+    console.log("Updated friendship data: ", data);
     return "Friend request accepted successfully!";
   } catch (error) {
     console.error("Unexpected error accepting friend request:", error);
