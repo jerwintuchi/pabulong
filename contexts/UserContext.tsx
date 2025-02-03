@@ -6,7 +6,7 @@ import { User } from "@supabase/supabase-js";
 import { executeEventChannel } from "@/utils/subscriptions/event-channels";
 
 // Define state
-interface UserState {
+export interface UserState {
     user: User | null;
     username: string | null;
     secretMessage: string | null;

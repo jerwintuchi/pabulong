@@ -140,15 +140,22 @@ export const getUserFriends = async () => {
   try {
     const { data, error } = await supabase
       .from("friendships")
-      .select("friend_id")
-      .eq("user_id", user.id)
+      .select("user_id, friend_id")
+      .or(`user_id.eq.${user.id},friend_id.eq.${user.id}`)
       .eq("status", "accepted");
 
     if (error) {
       console.error("Error fetching friends:", error);
       return [];
     }
-    return data?.map((f) => f.friend_id) || [];
+
+    // Extract user_ids and friend_ids for both sides of the friendship
+    const friends =
+      data?.map((f) => (f.user_id === user.id ? f.friend_id : f.user_id)) || [];
+
+    console.log("friends : ", friends);
+
+    return friends;
   } catch (error) {
     console.error("Unexpected error fetching user friends:", error);
     return [];
@@ -252,8 +259,8 @@ export const getPendingFriendRequests = async () => {
     // Step 3: Fetch the usernames for each user_id from the profiles table
     const { data: usernamesData, error: usernamesError } = await supabase
       .from("profiles")
-      .select("username")  // Fetch usernames based on user_id
-      .in("user_id", userIds);  // Only fetch usernames for user_ids in the list
+      .select("username") // Fetch usernames based on user_id
+      .in("user_id", userIds); // Only fetch usernames for user_ids in the list
 
     if (usernamesError) {
       console.error("Error fetching usernames:", usernamesError);
@@ -265,13 +272,12 @@ export const getPendingFriendRequests = async () => {
 
     console.log("Pending Friend Requests Usernames:", usernames);
 
-    return usernames;  // Return only the usernames
+    return usernames; // Return only the usernames
   } catch (error) {
     console.error("Unexpected error fetching pending requests:", error);
     return [];
   }
 };
-
 
 //send friend request
 export const sendFriendRequest = async (friendId: string) => {
@@ -330,18 +336,50 @@ export const sendFriendRequest = async (friendId: string) => {
   }
 };
 
-export const acceptFriendRequest = async (friendId: string) => {
+export const acceptFriendRequest = async (friendUsername: string) => {
   const supabase = await createClient();
   const user = await getUser();
   if (!user) return null;
+  //fetch the friend's friend_id based on their username
+  const { data: friendData, error: friendError } = await supabase
+    .from("profiles")
+    .select("user_id")
+    .eq("username", friendUsername)
+    .single();
+
+  if (friendError) {
+    console.error("Error fetching friend's user_id:", friendError);
+    return null;
+  }
+  if (!friendData || !friendData.user_id) {
+    console.error("Friend not found");
+    return null;
+  }
+  console.log("friendData : ", friendData);
+  //fetch current user's user_id
+
+  const { data: userData, error: userError } = await supabase
+    .from("profiles")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (userError) {
+    console.error("Error fetching user's user_id:", userError);
+    return null;
+  }
+
+  if (!userData || !userData.user_id) {
+    console.error("User not found");
+    return null;
+  }
 
   try {
     const { error } = await supabase
       .from("friendships")
       .update({ status: "accepted" })
-      .eq("user_id", user.id)
-      .eq("friend_id", friendId);
-
+      .eq("friend_id", userData.user_id);
+    console.log("Current user's friend_id : ", userData.user_id);
     if (error) {
       console.error("Error accepting friend request:", error);
       return null;
