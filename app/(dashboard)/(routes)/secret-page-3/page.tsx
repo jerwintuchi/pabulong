@@ -45,7 +45,7 @@ export default function Page() {
 
     // Filter users to add (pending requests), excluding the current user
     const usersToAdd = (user?.pendingRequests || [])
-        .filter((userId): userId is string => userId !== null && userId !== user.user?.id); // Exclude current user
+        .filter((username): username is string => username !== null && username !== user.username); // Exclude current user
     console.log("usersToAdd: ", usersToAdd);
     // Display Accepted Friends
     const friends = user?.friends || [];

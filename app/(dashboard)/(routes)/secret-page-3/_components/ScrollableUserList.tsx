@@ -45,7 +45,7 @@ const ScrollableUserList: React.FC<ScrollableUserListProps> = ({ users }) => {
                                     <IoMdPersonAdd
                                         onClick={() => {
                                             console.log("Friend Request triggered for user:", user.username);  // Log to confirm it's triggered
-                                            handleFriendRequest(user.id);
+                                            handleFriendRequest(user.user_id);
                                         }}
                                         className="text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400"
                                     />

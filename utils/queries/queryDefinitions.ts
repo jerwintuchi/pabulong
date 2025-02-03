@@ -178,30 +178,6 @@ export const getFriendsSecretMessages = async () => {
   }
 };
 
-// Fetch pending friend requests
-export const getPendingFriendRequests = async () => {
-  const supabase = await createClient();
-  const user = await getUser();
-  if (!user) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from("friendships")
-      .select("user_id")
-      .eq("friend_id", user.id) // id from profiles table
-      .eq("status", "pending");
-
-    if (error) {
-      console.error("Error fetching pending friend requests:", error);
-      return [];
-    }
-    return data?.map((req) => req.user_id) || [];
-  } catch (error) {
-    console.error("Unexpected error fetching pending requests:", error);
-    return [];
-  }
-};
-
 // Fetch user's username
 export const getUserName = async () => {
   const supabase = await createClient();
@@ -251,24 +227,58 @@ export const handleDeleteAccount = async () => {
 
 // FOR FRIENDSHIPS
 
+// Fetch pending friend requests
+export const getPendingFriendRequests = async () => {
+  const supabase = await createClient();
+  const user = await getUser();
+  if (!user) return [];
+
+  try {
+    // Step 1: Fetch user_id from the friendships table where friend_id is the current user's id and status is pending
+    const { data, error } = await supabase
+      .from("friendships")
+      .select("user_id") // Fetch the user_id of the sender (the user who made the request)
+      .eq("friend_id", user.id) // This checks for requests sent to the current user
+      .eq("status", "pending");
+
+    if (error) {
+      console.error("Error fetching pending friend requests:", error);
+      return [];
+    }
+
+    // Step 2: Extract user_ids from the previous query
+    const userIds = data?.map((req) => req.user_id) || [];
+
+    // Step 3: Fetch the usernames for each user_id from the profiles table
+    const { data: usernamesData, error: usernamesError } = await supabase
+      .from("profiles")
+      .select("username")  // Fetch usernames based on user_id
+      .in("user_id", userIds);  // Only fetch usernames for user_ids in the list
+
+    if (usernamesError) {
+      console.error("Error fetching usernames:", usernamesError);
+      return [];
+    }
+
+    // Step 4: Extract the usernames
+    const usernames = usernamesData?.map((profile) => profile.username) || [];
+
+    console.log("Pending Friend Requests Usernames:", usernames);
+
+    return usernames;  // Return only the usernames
+  } catch (error) {
+    console.error("Unexpected error fetching pending requests:", error);
+    return [];
+  }
+};
+
+
 //send friend request
 export const sendFriendRequest = async (friendId: string) => {
   const supabase = await createClient();
   const user = await getUser();
   if (!user) return null;
 
-  /*   // Fetch the profile ID of the current user
-  const { data: profileData, error: profileError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("user_id", user.id)
-    .single();
-
-  if (profileError || !profileData) {
-    console.error("Error fetching user profile:", profileError);
-    return null;
-  }
- */
   // 🔹 Check if a friendship already exists
   const { data: existingFriendship, error: friendshipError } = await supabase
     .from("friendships")
