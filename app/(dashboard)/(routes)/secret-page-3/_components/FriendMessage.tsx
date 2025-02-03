@@ -1,16 +1,21 @@
-import React from 'react'
+import React from 'react';
 
 interface FriendMessageProps {
-    selectedFriend: string | null
-    selectedFriendMessage: string | null | undefined
+    selectedFriend: string | null;
+    selectedFriendMessage: string | null | undefined;
+    allUsers: { user_id: string; username: string }[]; // Add allUsers prop
 }
-export default function FriendMessage({ selectedFriend, selectedFriendMessage }: FriendMessageProps) {
+
+export default function FriendMessage({ selectedFriend, selectedFriendMessage, allUsers }: FriendMessageProps) {
+    // Find the selected friend's username from the allUsers list
+    const selectedFriendUser = allUsers.find(user => user.user_id === selectedFriend);
+
     return (
         <>
-            {selectedFriend && (
+            {selectedFriend && selectedFriendUser && (
                 <div className="my-6">
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-                        Secret Message from {selectedFriend}
+                        Secret Message from {selectedFriendUser.username} {/* Use username here */}
                     </h2>
                     <div className="mt-4 bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md">
                         {selectedFriendMessage ? (
@@ -20,6 +25,7 @@ export default function FriendMessage({ selectedFriend, selectedFriendMessage }:
                         )}
                     </div>
                 </div>
-            )}</>
-    )
+            )}
+        </>
+    );
 }

@@ -68,12 +68,13 @@ export default function Page() {
             <FriendRequest usersToAdd={usersToAdd} />
 
             {/* Card 2: Friends List */}
-            <FriendList friends={friends} setSelectedFriend={setSelectedFriend} />
+            <FriendList friends={friends} setSelectedFriend={setSelectedFriend} allUsers={filteredUsers} />
 
             {/* Card 3: Friend's Secret Message */}
             <FriendMessage
                 selectedFriend={selectedFriend}
                 selectedFriendMessage={selectedFriendMessage}
+                allUsers={filteredUsers}
             />
 
             {/* Card 4: Scrollable List of All Users (excluding current user) */}

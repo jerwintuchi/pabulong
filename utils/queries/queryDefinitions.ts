@@ -152,9 +152,6 @@ export const getUserFriends = async () => {
     // Extract user_ids and friend_ids for both sides of the friendship
     const friends =
       data?.map((f) => (f.user_id === user.id ? f.friend_id : f.user_id)) || [];
-
-    console.log("friends : ", friends);
-
     return friends;
   } catch (error) {
     console.error("Unexpected error fetching user friends:", error);
