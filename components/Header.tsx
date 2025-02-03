@@ -15,9 +15,9 @@ export default function Header() {
     //render SignIn/SignUp button dynamically based on route
     const route = usePathname();
     return (
-        <div className="sticky bg-black top-0 z-50 w-full">
+        <div className="sticky top-0 z-50 w-full">
             {/* Navigation Bar */}
-            <div className="w-full border-b flex flex-row items-center h-16 px-8">
+            <div className="w-full border-b flex flex-row items-center h-16 px-8 ">
                 <GiLips size={36} />
                 {/* Left - App Title */}
                 <div className="font-semibold text-4xl">
@@ -28,15 +28,15 @@ export default function Header() {
                 {/* Push ThemeSwitcher to the right */}
                 <div className=" flex flex-row ml-auto gap-2">
                     {route === "/sign-in" ? (<Button className='text-sm bg-white text-black hover:bg-gray-300 dark:bg-white dark:text-black  dark:hover:bg-gray-200'>
-                        <a href={"/sign-in"}>
-                            Sign In
+                        <a href={"/sign-up"}>
+                            Sign Up
                         </a>
                     </Button>)
                         :
                         (
                             route === "/sign-up" && (<Button className='text-sm bg-white text-black hover:bg-gray-300 dark:bg-white dark:text-black  dark:hover:bg-gray-200'>
-                                <a href={"/sign-up"}>
-                                    Sign Up
+                                <a href={"/sign-in"}>
+                                    Sign In
                                 </a>
                             </Button>)
                         )}
