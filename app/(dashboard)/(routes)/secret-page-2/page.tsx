@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { getSecretMessage, updateSecretMessage } from "@/utils/queries/queryDefinitions";
+import { updateSecretMessage } from "@/utils/queries/queryDefinitions";
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/buttons/submit-button";
 import SecretMessage from "@/components/SecretMessage";
+import { BsFillSendFill } from "react-icons/bs";
 
 const SecretPage2 = () => {
   const { user, dispatch, loading } = useUser();
@@ -37,8 +37,8 @@ const SecretPage2 = () => {
           className="w-full p-2 border rounded mt-1"
           required
         />
-        <SubmitButton className="mt-3 bg-blue-600 text-white py-2 px-4 rounded">
-          {secretMessage ? "Update Message" : "Add Message"}
+        <SubmitButton className="mt-3 bg-blue-600 text-white py-2 px-4 rounded-sm">
+          {secretMessage ? <BsFillSendFill /> : "Add Message"}
         </SubmitButton>
       </form>
 
