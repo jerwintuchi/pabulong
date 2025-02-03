@@ -78,6 +78,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     secret_message: null, // Default placeholder, will be filled from friendsSecretMessages
                 }));
 
+                const pendingRequestsFromContext = await getPendingFriendRequests();
+                console.log("Pending Friend Requests: ", pendingRequestsFromContext);
                 // Now match each friend with their secret message
                 const friendsWithMessages = friends.map((friend) => {
                     const matchingMessage = friendsSecretMessages.find(

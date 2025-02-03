@@ -8,10 +8,11 @@ import FriendMessage from "./_components/FriendMessage";
 import ScrollableUserList from "./_components/ScrollableUserList";
 import { getAllUsers } from "@/utils/queries/queryDefinitions";
 
+
 export default function Page() {
     const { user, loading } = useUser();
     const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
-    const [allUsers, setAllUsers] = useState<{ user_id: string; username: string; email: string; secret_message: string }[] | null>(null);
+    const [allUsers, setAllUsers] = useState<{ id: string; user_id: string; username: string; email: string; secret_message: string }[] | null>(null);
 
     // Always call hooks before conditional logic
     useEffect(() => {
@@ -23,6 +24,7 @@ export default function Page() {
             try {
                 const users = await getAllUsers(); // Call API or query to fetch all users
                 const usersList = users?.map(user => ({
+                    id: user.id,
                     user_id: user.user_id ?? "", // Fallback to empty string if null
                     username: user.username ?? "",
                     email: user.email ?? "", // Add email to the data
@@ -44,7 +46,7 @@ export default function Page() {
     // Filter users to add (pending requests), excluding the current user
     const usersToAdd = (user?.pendingRequests || [])
         .filter((userId): userId is string => userId !== null && userId !== user.user?.id); // Exclude current user
-
+    console.log("usersToAdd: ", usersToAdd);
     // Display Accepted Friends
     const friends = user?.friends || [];
 

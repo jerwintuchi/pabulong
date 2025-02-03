@@ -257,18 +257,88 @@ export const sendFriendRequest = async (friendId: string) => {
   const user = await getUser();
   if (!user) return null;
 
+  /*   // Fetch the profile ID of the current user
+  const { data: profileData, error: profileError } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (profileError || !profileData) {
+    console.error("Error fetching user profile:", profileError);
+    return null;
+  }
+ */
+  // 🔹 Check if a friendship already exists
+  const { data: existingFriendship, error: friendshipError } = await supabase
+    .from("friendships")
+    .select("id, status")
+    .or(
+      `and(user_id.eq.${user.id},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${user.id})`
+    )
+    .single();
+
+  if (friendshipError && friendshipError.code !== "PGRST116") {
+    // Ignore "PGRST116" (no rows found) since it means the friendship doesn't exist
+    console.error("Error checking friendship:", friendshipError);
+    return null;
+  }
+
+  // If the friendship already exists and the status is "confirmed", return that
+  if (existingFriendship && existingFriendship.status === "confirmed") {
+    console.log("You are already friends with this user.");
+    return "You are already friends with this user.";
+  }
+
+  // If there's a pending request, prevent sending a new one
+  if (existingFriendship && existingFriendship.status === "pending") {
+    console.log("Friend request is already pending.");
+    return "Friend request is already pending.";
+  }
+
+  // 🔹 Insert the friend request
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("friendships")
-      .insert({ user_id: user.id, friend_id: friendId, status: "pending" });
+      .insert({
+        user_id: user.id,
+        friend_id: friendId,
+        status: "pending", // Set status as "pending"
+      })
+      .select();
 
     if (error) {
       console.error("Error sending friend request:", error);
       return null;
     }
+
+    console.log("data : ", data);
     return "Friend request sent successfully!";
   } catch (error) {
     console.error("Unexpected error sending friend request:", error);
+    return null;
+  }
+};
+
+export const acceptFriendRequest = async (friendId: string) => {
+  const supabase = await createClient();
+  const user = await getUser();
+  if (!user) return null;
+
+  try {
+    const { error } = await supabase
+      .from("friendships")
+      .update({ status: "accepted" })
+      .eq("user_id", user.id)
+      .eq("friend_id", friendId);
+
+    if (error) {
+      console.error("Error accepting friend request:", error);
+      return null;
+    }
+    return "Friend request accepted successfully!";
+  } catch (error) {
+    console.error("Unexpected error accepting friend request:", error);
     return null;
   }
 };

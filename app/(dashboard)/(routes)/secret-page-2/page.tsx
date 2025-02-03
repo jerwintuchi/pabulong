@@ -33,7 +33,7 @@ const SecretPage2 = () => {
         <textarea
           name="message"
           id="message"
-          defaultValue={secretMessage}
+          defaultValue={""}
           className="w-full p-2 border rounded mt-1"
           required
         />
