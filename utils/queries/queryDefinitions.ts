@@ -1,17 +1,14 @@
 "use server";
-import { Database } from "@/app/types/supabase";
+
 import { createClient } from "../supabase/server";
-import { createClient as createClientSupabase } from "@supabase/supabase-js";
+
 // Fetch authenticated user
 export const getUser = async () => {
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) {
-    console.error("Error fetching user:", error);
-    return null;
-  }
-  return data?.user || null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
 };
 export const getAuthUser = async () => {
   const supabase = await createClient();
@@ -24,20 +21,6 @@ export const getAuthUser = async () => {
   return data?.user || null;
 };
 
-export const getUserSession = async () => {
-  const supabase = createClientSupabase<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const { data, error } = await supabase.auth.getSession();
-
-  if (error) {
-    console.error("Error fetching user:", error);
-    return null;
-  }
-  return data?.session || null;
-};
 // Fetch secret message of the logged-in user
 export const getSecretMessage = async () => {
   const supabase = await createClient();

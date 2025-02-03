@@ -12,7 +12,7 @@ export default function HomePageClient() {
         return <p className="text-center text-gray-500">Loading user data...</p>;
     }
 
-    return  (
+    return (
         <div className="relative flex justify-center mt-20">
             <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700">
                 <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">

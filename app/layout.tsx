@@ -1,10 +1,9 @@
-
+// app/layout.tsx
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Header from "@/components/Header";
-import { getUser } from "@/utils/queries/queryDefinitions";
-import { createClient } from "@/utils/supabase/server";
+
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
