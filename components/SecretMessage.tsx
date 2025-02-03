@@ -43,7 +43,7 @@ export default function SecretMessage({ secretMessage }: SecretMessageProps) {
     }, [supabase, router, currentMessage]);  // Include `currentMessage` to track it when updating
 
     return (
-        <div className="flex flex-col text-sm text-gray-200 p-4 border border-zinc-50 rounded-sm ">
+        <div className="flex flex-col text-sm text-gray-400 p-4 border border-zinc-50 rounded-sm ">
             Previous Message:
             <span className="text-teal-400 pl-2 pb-2">{oldMessage || "No previous message"}</span>  {/* Display the old message */}
             My Secret Message:

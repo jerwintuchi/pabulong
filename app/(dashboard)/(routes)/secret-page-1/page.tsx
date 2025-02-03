@@ -21,7 +21,7 @@ export default function SecretPage1() {
     const secretMessage = user.secretMessage || "You don't have a secret message yet. Add some friends!";
 
     return (
-        <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
+        <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-300 dark:border-gray-700">
             <h1 className="text-3xl font-semibold text-center text-gray-900 dark:text-gray-100">
                 Secret Page 1
             </h1>
