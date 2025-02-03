@@ -13,13 +13,13 @@ export default function Page() {
     const { user, loading } = useUser();
     const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
     const [allUsers, setAllUsers] = useState<{ id: string; user_id: string; username: string; email: string; secret_message: string }[] | null>(null);
-
+    const [mounted, setMounted] = useState(false);
     // Always call hooks before conditional logic
     useEffect(() => {
         if (loading || !user) {
             return; // Skip fetching users if the user data is still loading or not available
         }
-
+        setMounted(true);
         const fetchUsers = async () => {
             try {
                 const users = await getAllUsers(); // Call API or query to fetch all users
@@ -60,7 +60,7 @@ export default function Page() {
 
 
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700 mt-10">
+        <div className={`max-w-4xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700 mt-10 ${mounted ? "opacity-100" : "opacity-0"} transition-opacity duration-1000`}>
             <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
                 Secret Page 3
             </h1>

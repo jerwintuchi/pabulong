@@ -2,7 +2,7 @@
 
 import { useUser } from "@/contexts/UserContext";
 import { updateSecretMessage } from "@/utils/queries/queryDefinitions";
-import { useActionState } from "react";
+import { use, useActionState, useEffect, useState } from "react";
 import { SubmitButton } from "@/components/buttons/submit-button";
 import SecretMessage from "@/components/SecretMessage";
 import { BsFillSendFill } from "react-icons/bs";
@@ -10,7 +10,10 @@ import { BsFillSendFill } from "react-icons/bs";
 const SecretPage2 = () => {
   const { user, dispatch, loading } = useUser();
   const secretMessage = user.secretMessage || "You don't have a secret message yet.";
-
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, [])
 
   const [status, formAction] = useActionState(updateSecretMessage, null);
 
@@ -20,7 +23,7 @@ const SecretPage2 = () => {
   }
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700 mt-10">
+    <div className={`max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-md border border-gray-300 dark:border-gray-700 mt-10 ${mounted ? "opacity-100" : "opacity-0"} transition-opacity duration-1000`}>
       <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
         Secret Page 2
       </h1>
