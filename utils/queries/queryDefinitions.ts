@@ -12,7 +12,16 @@ export const getUser = async () => {
   }
   return data?.user || null;
 };
+export const getAuthUser = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
 
+  if (error) {
+    console.error("Error fetching user:", error);
+    return null;
+  }
+  return data?.user || null;
+};
 // Fetch secret message of the logged-in user
 export const getSecretMessage = async () => {
   const supabase = await createClient();

@@ -7,8 +7,8 @@ import { useActionState } from "react";
 import { SubmitButton } from "@/components/buttons/submit-button";
 
 const SecretPage2 = () => {
-  const { user, loading } = useUser();
-  const [secretMessage, setSecretMessage] = useState(user?.secretMessage || "");
+  const { user, dispatch, loading } = useUser();
+  const [secretMessage, setSecretMessage] = useState(user.secretMessage || "");
 
 
   const [status, formAction] = useActionState(updateSecretMessage, null);
@@ -27,7 +27,7 @@ const SecretPage2 = () => {
     if (!secretMessage) {
       fetchSecretMessage();
     }
-  }, []);
+  }, [secretMessage]);
 
   if (loading) {
     return <p className="text-center text-gray-500">Loading user data...</p>;
@@ -38,7 +38,7 @@ const SecretPage2 = () => {
       <h1 className="text-2xl font-medium text-gray-900 dark:text-gray-100 text-center">
         Secret Page 2
       </h1>
-      <p className="text-center text-gray-500 pb-4">Username: {user?.username}</p>
+      <p className="text-center text-gray-500 pb-4">Username: {user.username}</p>
       <div className="text-sm text-gray-200 p-4 border border-zinc-50 rounded-sm">
         My Secret Message:
         <span className="text-teal-400 pl-2">{secretMessage || "No message yet."}</span>

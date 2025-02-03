@@ -1,34 +1,82 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useReducer,
+    Dispatch,
+    useState,
+} from "react";
 import {
+    getAuthUser,
     getPendingFriendRequests,
     getSecretMessage,
-    getUser,
     getUserFriends,
-    getUserName
+    getUserName,
 } from "@/utils/queries/queryDefinitions";
 import { UserType } from "@/app/types/definitions";
+import { User } from "@supabase/supabase-js";
+
+// Define state
+interface UserState {
+    user: User | null; //User from supabase
+    username: string | null;
+    secretMessage: string | null;
+    friends: { user_id: string | null; secret_message: string | null }[];
+    pendingRequests: (string | null)[];
+}
+
+// Initial state
+const initialState: UserState = {
+    user: null,
+    username: null,
+    secretMessage: null,
+    friends: [],
+    pendingRequests: [],
+};
+
+// Define action types
+type Action =
+    | { type: "SET_USER"; payload: Partial<UserState> }
+    | { type: "SET_LOADING"; payload: boolean };
+
+// Reducer function
+const userReducer = (state: UserState, action: Action): UserState => {
+    switch (action.type) {
+        case "SET_USER":
+            return { ...state, ...action.payload };
+        default:
+            return state;
+    }
+};
 
 // Define context type
-interface UserContextType {
-    user: UserType | null;
+interface UserContextValue {
+    user: UserState;
+    dispatch: Dispatch<Action>;
     loading: boolean;
 }
 
-// Create context with default values
-const UserContext = createContext<UserContextType>({ user: null, loading: true });
+// Create context
+const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 // Provider component
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<UserType | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+    const [user, dispatch] = useReducer(userReducer, initialState);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
+            setLoading(true); // Ensure loading state is correctly managed
+
             try {
-                const userData = await getUser();
-                if (!userData) return;
+                const userData = await getAuthUser(); // Await the function here
+
+                if (!userData) {
+                    setLoading(false);
+                    return;
+                }
 
                 const [username, secretMessage, friendsRaw, pendingRequests] = await Promise.all([
                     getUserName(),
@@ -42,12 +90,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     secret_message: null, // Default placeholder
                 }));
 
-                setUser({
-                    user: userData,
-                    username,
-                    secretMessage,
-                    friends,
-                    pendingRequests,
+                dispatch({
+                    type: "SET_USER",
+                    payload: {
+                        user: userData, // Now userData is resolved
+                        username,
+                        secretMessage,
+                        friends,
+                        pendingRequests,
+                    },
                 });
             } catch (error) {
                 console.error("Failed to fetch user data", error);
@@ -57,14 +108,22 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         fetchUserData();
+
+
     }, []);
 
     return (
-        <UserContext.Provider value={{ user, loading }}>
+        <UserContext.Provider value={{ user, dispatch, loading }}>
             {children}
         </UserContext.Provider>
     );
 };
 
 // Custom hook
-export const useUser = () => useContext(UserContext);
+export const useUser = (): UserContextValue => {
+    const context = useContext(UserContext);
+    if (!context) {
+        throw new Error("useUser must be used within a UserProvider");
+    }
+    return context;
+};

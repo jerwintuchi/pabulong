@@ -7,25 +7,18 @@ import DeleteAccountButton from "@/components/buttons/delete-account-button";
 import { useUser } from "@/contexts/UserContext";
 
 export default function SecretPage1() {
-    const userData = useUser();
-    const [loading, setLoading] = useState(true);
+    const { user, dispatch, loading } = useUser();
 
-    useEffect(() => {
-        if (userData === null) {
-            setLoading(true);
-        } else {
-            setLoading(false);
-        }
-    }, [userData]);
 
     if (loading) {
         return <p className="text-center text-gray-700 dark:text-gray-300">Loading...</p>;
     }
 
-    if (!userData) {
+    if (!user) {
         console.log("USER DATA IS NULL");
         return null;
     }
+    const secretMessage = user.secretMessage || "You don't have a secret message yet. Add some friends!";
 
     return (
         <div className="max-w-lg mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
@@ -34,7 +27,7 @@ export default function SecretPage1() {
             </h1>
             <div className="mt-6 text-center">
                 <p className="text-lg text-gray-700 dark:text-gray-300">
-                    {userData.secretMessage || "You don't have a secret message yet. Add some friends!"}
+                    {secretMessage || "You don't have a secret message yet. Add some friends!"}
                 </p>
             </div>
             <div className="mt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
