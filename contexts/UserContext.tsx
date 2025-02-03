@@ -1,27 +1,13 @@
 "use client";
+import React, { createContext, useContext, useEffect, useReducer, Dispatch, useState } from "react";
+import { getAuthUser, getPendingFriendRequests, getSecretMessage, getUserFriends, getUserName, getFriendsSecretMessages } from "@/utils/queries/queryDefinitions";
 
-import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useReducer,
-    Dispatch,
-    useState,
-} from "react";
-import {
-    getAuthUser,
-    getPendingFriendRequests,
-    getSecretMessage,
-    getUserFriends,
-    getUserName,
-} from "@/utils/queries/queryDefinitions";
-import { UserType } from "@/app/types/definitions";
 import { User } from "@supabase/supabase-js";
 import { executeEventChannel } from "@/utils/subscriptions/event-channels";
 
 // Define state
 interface UserState {
-    user: User | null; //User from supabase
+    user: User | null;
     username: string | null;
     secretMessage: string | null;
     friends: { user_id: string | null; secret_message: string | null }[];
@@ -79,25 +65,37 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     return;
                 }
 
-                const [username, secretMessage, friendsRaw, pendingRequests] = await Promise.all([
+                const [username, secretMessage, friendsRaw, pendingRequests, friendsSecretMessages] = await Promise.all([
                     getUserName(),
                     getSecretMessage(),
                     getUserFriends(),
                     getPendingFriendRequests(),
+                    getFriendsSecretMessages(), // Fetch secret messages of friends
                 ]);
 
                 const friends = friendsRaw.map((friendId: string | null) => ({
                     user_id: friendId,
-                    secret_message: null, // Default placeholder
+                    secret_message: null, // Default placeholder, will be filled from friendsSecretMessages
                 }));
+
+                // Now match each friend with their secret message
+                const friendsWithMessages = friends.map((friend) => {
+                    const matchingMessage = friendsSecretMessages.find(
+                        (f) => f.user_id === friend.user_id
+                    );
+                    return {
+                        ...friend,
+                        secret_message: matchingMessage ? matchingMessage.secret_message : null,
+                    };
+                });
 
                 dispatch({
                     type: "SET_USER",
                     payload: {
-                        user: userData, // Now userData is resolved
+                        user: userData,
                         username,
                         secretMessage,
-                        friends,
+                        friends: friendsWithMessages,
                         pendingRequests,
                     },
                 });
@@ -111,8 +109,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     console.log("secret message channel executed");
                 }
 
-
-
             } catch (error) {
                 console.error("Failed to fetch user data", error);
             } finally {
@@ -121,8 +117,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         };
 
         fetchUserData();
-
-
     }, []);
 
     return (

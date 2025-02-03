@@ -21,6 +21,18 @@ export const getAuthUser = async () => {
   return data?.user || null;
 };
 
+export const getAllUsers = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("profiles").select("*");
+
+  if (error) {
+    console.error("Error fetching users:", error);
+    return null;
+  }
+
+  return data || null;
+};
+
 // Fetch secret message of the logged-in user
 export const getSecretMessage = async () => {
   const supabase = await createClient();
@@ -176,7 +188,7 @@ export const getPendingFriendRequests = async () => {
     const { data, error } = await supabase
       .from("friendships")
       .select("user_id")
-      .eq("friend_id", user.id)
+      .eq("friend_id", user.id) // id from profiles table
       .eq("status", "pending");
 
     if (error) {
@@ -233,6 +245,30 @@ export const handleDeleteAccount = async () => {
     return "Account successfully deleted";
   } catch (error) {
     console.error("Unexpected error deleting account:", error);
+    return null;
+  }
+};
+
+// FOR FRIENDSHIPS
+
+//send friend request
+export const sendFriendRequest = async (friendId: string) => {
+  const supabase = await createClient();
+  const user = await getUser();
+  if (!user) return null;
+
+  try {
+    const { error } = await supabase
+      .from("friendships")
+      .insert({ user_id: user.id, friend_id: friendId, status: "pending" });
+
+    if (error) {
+      console.error("Error sending friend request:", error);
+      return null;
+    }
+    return "Friend request sent successfully!";
+  } catch (error) {
+    console.error("Unexpected error sending friend request:", error);
     return null;
   }
 };
