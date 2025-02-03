@@ -5,29 +5,15 @@ import { useUser } from "@/contexts/UserContext";
 import { getSecretMessage, updateSecretMessage } from "@/utils/queries/queryDefinitions";
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/buttons/submit-button";
+import SecretMessage from "@/components/SecretMessage";
 
 const SecretPage2 = () => {
   const { user, dispatch, loading } = useUser();
-  const [secretMessage, setSecretMessage] = useState(user.secretMessage || "");
+  const secretMessage = user.secretMessage || "You don't have a secret message yet. Add some friends!";
 
 
   const [status, formAction] = useActionState(updateSecretMessage, null);
 
-  // Fetch latest secret message
-  useEffect(() => {
-    const fetchSecretMessage = async () => {
-      try {
-        const message = await getSecretMessage();
-        setSecretMessage(message || "");
-      } catch (error) {
-        console.error("Error fetching secret message:", error);
-      }
-    };
-
-    if (!secretMessage) {
-      fetchSecretMessage();
-    }
-  }, [secretMessage]);
 
   if (loading) {
     return <p className="text-center text-gray-500">Loading user data...</p>;
@@ -39,10 +25,7 @@ const SecretPage2 = () => {
         Secret Page 2
       </h1>
       <p className="text-center text-gray-500 pb-4">Username: {user.username}</p>
-      <div className="text-sm text-gray-200 p-4 border border-zinc-50 rounded-sm">
-        My Secret Message:
-        <span className="text-teal-400 pl-2">{secretMessage || "No message yet."}</span>
-      </div>
+      <SecretMessage secretMessage={secretMessage} />
       <form action={formAction} className="mt-12">
         <label htmlFor="message" className="block text-sm font-medium">
           Update Secret Message:

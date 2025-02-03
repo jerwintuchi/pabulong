@@ -17,6 +17,7 @@ import {
 } from "@/utils/queries/queryDefinitions";
 import { UserType } from "@/app/types/definitions";
 import { User } from "@supabase/supabase-js";
+import { executeEventChannel } from "@/utils/subscriptions/event-channels";
 
 // Define state
 interface UserState {
@@ -37,7 +38,7 @@ const initialState: UserState = {
 };
 
 // Define action types
-type Action =
+export type Action =
     | { type: "SET_USER"; payload: Partial<UserState> }
     | { type: "SET_LOADING"; payload: boolean };
 
@@ -100,6 +101,18 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                         pendingRequests,
                     },
                 });
+
+                const secretMessageChannel = await executeEventChannel({
+                    channelName: "secret-message-updated",
+                    user: userData,
+                    dispatch,
+                });
+                if (secretMessageChannel) {
+                    console.log("secret message channel executed");
+                }
+
+
+
             } catch (error) {
                 console.error("Failed to fetch user data", error);
             } finally {
