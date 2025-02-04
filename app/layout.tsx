@@ -1,3 +1,4 @@
+"use client";
 // app/layout.tsx
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
@@ -11,11 +12,6 @@ const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3000";
 
-export const metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Pabulong",
-  description: "Worksheet 2.1",
-};
 
 const geistSans = Geist({
   display: "swap",
@@ -52,7 +48,7 @@ export default function RootLayout({
             </main>
           </ThemeProvider>
         </body >
-      </html >
-    </UserProvider>
+      </html ></UserProvider>
+
   );
 }

@@ -1,18 +1,18 @@
-"use client";
-// components/SecretLayout.tsx
+
+// app/(dashboard)/layout.tsx
 import React from "react";
 import NavLinks from "@/components/NavLinks";
-import { UserProvider, useUser } from "@/contexts/UserContext";
 import { Toaster } from "react-hot-toast";
+import { getServerUser } from "@/utils/helpers/user-server";
 
 interface SecretLayoutProps {
     children: React.ReactNode;
 }
 
-export default function SecretLayout({ children }: SecretLayoutProps) {
-    const { user: session } = useUser();
-    const isAuthenticated = !!session.user;
-    console.log("Session:", session);
+export default async function SecretLayout({ children }: SecretLayoutProps) {
+    const user = await getServerUser();
+    const isAuthenticated = !!user;
+    console.log("Session:", user);
     return (
         <>
             <Toaster position="top-center" reverseOrder={false} />

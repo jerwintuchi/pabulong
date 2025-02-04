@@ -1,27 +1,14 @@
-"use client";
-// app/(dashboard)/page.tsx
 import React from "react";
 import HomePageClient from "./_components/HomePageClient";
 import Home from "@/components/Home";
-import { useUser } from "@/contexts/UserContext";
-
-
-
+import { getServerUser } from "@/utils/helpers/user-server";
 
 // The HomePage component
-export default function HomePage() {
-    const { user } = useUser();
+export default async function HomePage() {
+    const user = await getServerUser();
     // Check user authentication state
-    const isAuthenticated = user.user;
+    const isAuthenticated = user;
 
-    if (isAuthenticated) {
-        // Render the HomePageClient with the user data as props
-        return <HomePageClient />;
-    }
-
-    // If not authenticated, render Home component
-    return <Home />
-
+    // Pass user data to HomePageClient to avoid refetching
+    return isAuthenticated ? <HomePageClient user={user} /> : <Home />;
 }
-
-

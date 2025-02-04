@@ -1,135 +1,63 @@
-"use client";
-import React, { createContext, useContext, useEffect, useReducer, Dispatch, useState } from "react";
-import { getAuthUser, getPendingFriendRequests, getSecretMessage, getUserFriends, getUserName, getFriendsSecretMessages } from "@/utils/queries/queryDefinitions";
+import { UserType } from "@/app/types/definitions"; // Ensure this is the correct UserType interface
+import { getServerUser } from "@/utils/helpers/user-server";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 
-import { User } from "@supabase/supabase-js";
-import { executeEventChannel } from "@/utils/subscriptions/event-channels";
-
-// Define state
-export interface UserState {
-    user: User | null;
-    username: string | null;
-    secretMessage: string | null;
-    friends: { user_id: string | null; secret_message: string | null }[];
-    pendingRequests: (string | null)[];
-}
-
-// Initial state
-const initialState: UserState = {
-    user: null,
-    username: null,
-    secretMessage: null,
-    friends: [],
-    pendingRequests: [],
-};
-
-// Define action types
-export type Action =
-    | { type: "SET_USER"; payload: Partial<UserState> }
-    | { type: "SET_LOADING"; payload: boolean };
-
-// Reducer function
-const userReducer = (state: UserState, action: Action): UserState => {
-    switch (action.type) {
-        case "SET_USER":
-            return { ...state, ...action.payload };
-        default:
-            return state;
-    }
-};
-
-// Define context type
-interface UserContextValue {
-    user: UserState;
-    dispatch: Dispatch<Action>;
+// Define the UserContextType with UserType for userData
+interface UserContextType {
+    userData: UserType | null;
+    setUserData: (data: UserType | null) => void;
     loading: boolean;
 }
 
-// Create context
-const UserContext = createContext<UserContextValue | undefined>(undefined);
+// Create a context with default values
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Provider component
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, dispatch] = useReducer(userReducer, initialState);
+interface UserProviderProps {
+    children: ReactNode;
+}
+
+
+export const UserProvider = ({ children }: UserProviderProps) => {
+    const [userData, setUserData] = useState<UserType | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUserData = async () => {
-            setLoading(true); // Ensure loading state is correctly managed
-
             try {
-                const userData = await getAuthUser(); // Await the function here
-
-                if (!userData) {
+                const serverUser = await getServerUser();
+                if (!serverUser) {
                     setLoading(false);
                     return;
                 }
 
-                const [username, secretMessage, friendsRaw, pendingRequests, friendsSecretMessages] = await Promise.all([
-                    getUserName(),
-                    getSecretMessage(),
-                    getUserFriends(),
-                    getPendingFriendRequests(),
-                    getFriendsSecretMessages(), // Fetch secret messages of friends
-                ]);
+                const user: UserType = {
+                    user: serverUser.user,
+                    username: serverUser.username,
+                    secretMessage: serverUser.secretMessage,
+                    friends: serverUser.friends,
+                    pendingRequests: serverUser.pendingRequests,
+                };
 
-                const friends = friendsRaw.map((friendId: string | null) => ({
-                    user_id: friendId,
-                    secret_message: null, // Default placeholder, will be filled from friendsSecretMessages
-                }));
-
-                const pendingRequestsFromContext = await getPendingFriendRequests();
-                console.log("Pending Friend Requests: ", pendingRequestsFromContext);
-                // Now match each friend with their secret message
-                const friendsWithMessages = friends.map((friend) => {
-                    const matchingMessage = friendsSecretMessages.find(
-                        (f) => f.user_id === friend.user_id
-                    );
-                    return {
-                        ...friend,
-                        secret_message: matchingMessage ? matchingMessage.secret_message : null,
-                    };
-                });
-
-                dispatch({
-                    type: "SET_USER",
-                    payload: {
-                        user: userData,
-                        username,
-                        secretMessage,
-                        friends: friendsWithMessages,
-                        pendingRequests,
-                    },
-                });
-
-                const secretMessageChannel = await executeEventChannel({
-                    channelName: "secret-message-updated",
-                    user: userData,
-                    dispatch,
-                });
-                if (secretMessageChannel) {
-                    console.log("secret message channel executed");
-                }
-
+                setUserData(user);
+                setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch user data", error);
-            } finally {
+                console.error("Error fetching user data:", error);
                 setLoading(false);
             }
         };
 
         fetchUserData();
-    }, []);
+    }, []); // Run the fetch only once on component mount
 
     return (
-        <UserContext.Provider value={{ user, dispatch, loading }}>
+        <UserContext.Provider value={{ userData, setUserData, loading }}>
             {children}
         </UserContext.Provider>
     );
 };
 
-// Custom hook
-export const useUser = (): UserContextValue => {
+// Custom hook to access the UserContext
+export const useUser = (): UserContextType => {
     const context = useContext(UserContext);
     if (!context) {
         throw new Error("useUser must be used within a UserProvider");

@@ -56,7 +56,6 @@ export default async function Signup(props: {
           </p>
         </div>
       </form>
-      <SmtpMessage />
     </>
   );
 }
