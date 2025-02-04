@@ -8,7 +8,6 @@ import {
   getPendingFriendRequests,
   getFriendsSecretMessages,
 } from "../queries/queryDefinitions";
-import { User } from "@supabase/supabase-js";
 
 export async function getServerUser() {
   const supabase = await createClient();

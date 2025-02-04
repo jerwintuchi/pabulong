@@ -6,6 +6,7 @@ import FriendList from './FriendList';
 import FriendMessage from './FriendMessage';
 import FriendRequest from './FriendRequest';
 import ScrollableUserList from './ScrollableUserList';
+
 import { UserType } from '@/app/types/definitions';
 
 interface SecretPage3ClientProps {

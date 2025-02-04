@@ -1,6 +1,6 @@
-import { EventChannels } from "@/app/types/definitions";
+import { Action, EventChannels } from "@/app/types/definitions";
 // utils/subscriptions/event-channels.ts
-import { Action } from "@/contexts/UserContektsto";
+
 import { createClient } from "../supabase/client";
 
 import { Dispatch } from "react";

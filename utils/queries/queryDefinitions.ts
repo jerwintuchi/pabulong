@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "../supabase/server";
 
 // Fetch authenticated user
@@ -408,7 +409,7 @@ export const acceptFriendRequest = async (friendUsername: string) => {
       console.error("Error accepting friend request:", error);
       return null;
     }
-
+    revalidatePath("/secret-page-3");
     console.log("Updated friendship data: ", data);
     return "Friend request accepted successfully!";
   } catch (error) {
