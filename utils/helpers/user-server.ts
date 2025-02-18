@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server"; // Server-side Supabase client
+import { createClient } from "@/utils/supabase/server";
 import {
   getUserName,
   getSecretMessage,
@@ -8,8 +8,10 @@ import {
   getPendingFriendRequests,
   getFriendsSecretMessages,
 } from "../queries/queryDefinitions";
+import { cache } from "react";
 
-export async function getServerUser() {
+// Cache the basic user authentication check
+export const getBasicUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,42 +19,65 @@ export async function getServerUser() {
   } = await supabase.auth.getUser();
 
   if (error || !user) return null;
+  return user;
+});
 
-  // Fetch additional user data from the database
-  const [
+// Cache username separately as it rarely changes
+export const getCachedUsername = cache(async () => {
+  return getUserName();
+});
+
+// Interface for specifying which data to fetch
+interface UserDataOptions {
+  includeSecretMessage?: boolean;
+  includeFriends?: boolean;
+  includePendingRequests?: boolean;
+  includeFriendsMessages?: boolean;
+}
+
+// Main function to fetch user data with options
+export async function getServerUser(options: UserDataOptions = {}) {
+  const user = await getBasicUser();
+  if (!user) return null;
+
+  const username = await getCachedUsername();
+
+  const userData: any = {
+    user,
     username,
-    secretMessage,
-    friendsRaw,
-    pendingRequests,
-    friendsSecretMessages,
-  ] = await Promise.all([
-    getUserName(),
-    getSecretMessage(),
-    getUserFriends(),
-    getPendingFriendRequests(),
-    getFriendsSecretMessages(),
-  ]);
-
-  const friends = friendsRaw.map((friendId: string | null) => ({
-    user_id: friendId,
-    secret_message: null,
-  }));
-
-  const friendsWithMessages = friends.map((friend) => {
-    const matchingMessage = friendsSecretMessages.find(
-      (f) => f.user_id === friend.user_id
-    );
-    return {
-      ...friend,
-      secret_message: matchingMessage ? matchingMessage.secret_message : null,
-    };
-  });
-
-  return {
-    user: user,
-    username,
-    secretMessage,
-    friends: friendsWithMessages,
-    pendingRequests,
   };
+
+  // Get friends data first if we need either friends or their messages
+  if (options.includeFriends || options.includeFriendsMessages) {
+    const friendsRaw = await getUserFriends();
+    userData.friends = friendsRaw.map((friendId: string | null) => ({
+      user_id: friendId,
+      secret_message: null,
+    }));
+
+    // If we need friend messages, fetch them immediately after getting friends
+    if (options.includeFriendsMessages) {
+      const friendsMessages = await getFriendsSecretMessages();
+      // Ensure we're properly matching and assigning messages
+      userData.friends = userData.friends.map((friend: any) => {
+        const message = friendsMessages.find(
+          (msg: any) => msg.user_id === friend.user_id
+        );
+        return {
+          ...friend,
+          secret_message: message ? message.secret_message : null,
+        };
+      });
+    }
+  }
+
+  if (options.includeSecretMessage) {
+    userData.secretMessage = await getSecretMessage();
+  }
+
+  if (options.includePendingRequests) {
+    userData.pendingRequests = await getPendingFriendRequests();
+  }
+
+  return userData;
 }

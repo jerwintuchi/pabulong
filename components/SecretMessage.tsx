@@ -9,10 +9,26 @@ interface SecretMessageProps {
 }
 
 export default function SecretMessage({ secretMessage }: SecretMessageProps) {
-    const [oldMessage, setOldMessage] = useState<string | null>(secretMessage);  // Initially set old message to the current one
-    const [currentMessage, setCurrentMessage] = useState<string | null>(secretMessage);  // Track the current message
+    const [currentMessage, setCurrentMessage] = useState<string | null>(secretMessage);
+    const [previousMessage, setPreviousMessage] = useState<string | null>(() => {
+        // Initialize from localStorage if available
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('previousSecretMessage');
+        }
+        return null;
+    });
+    
     const supabase = createClient();
     const router = useRouter();
+
+    useEffect(() => {
+        // Update previous message when current message changes
+        if (secretMessage !== currentMessage && currentMessage !== null) {
+            localStorage.setItem('previousSecretMessage', currentMessage);
+            setPreviousMessage(currentMessage);
+        }
+        setCurrentMessage(secretMessage);
+    }, [secretMessage]);
 
     useEffect(() => {
         const profiles = supabase.channel('secret-message-updates')
@@ -20,34 +36,39 @@ export default function SecretMessage({ secretMessage }: SecretMessageProps) {
                 'postgres_changes',
                 { event: 'UPDATE', schema: 'public', table: 'profiles' },
                 (payload) => {
-                    console.log('Change received!', payload);  // Log the payload to verify if it's being triggered
+                    console.log('Change received!', payload);
 
-                    // Store the current message as the previous one before the update
-                    setOldMessage(currentMessage);  // Update the old message to the current message before change
-
-                    // Set the current message with the new updated message from the payload
                     if (payload.new && payload.new.secret_message) {
-                        setCurrentMessage(payload.new.secret_message);  // Update the current message
+                        // Store current message as previous before updating
+                        if (currentMessage && currentMessage !== payload.new.secret_message) {
+                            localStorage.setItem('previousSecretMessage', currentMessage);
+                            setPreviousMessage(currentMessage);
+                        }
+                        
+                        // Update current message
+                        setCurrentMessage(payload.new.secret_message);
                     }
 
-                    // Refresh the page or re-render the necessary parts
                     router.refresh();
                 }
             )
             .subscribe();
 
-        // Clean up the channel on component unmount
         return () => {
             supabase.removeChannel(profiles);
         };
-    }, [supabase, router, currentMessage]);  // Include `currentMessage` to track it when updating
+    }, [supabase, router, currentMessage]);
 
     return (
         <div className="flex flex-col text-sm text-gray-400 p-4 border border-zinc-50 rounded-sm ">
             Previous Message:
-            <span className="text-teal-400 pl-2 pb-2">{oldMessage || "No previous message"}</span>  {/* Display the old message */}
+            <span className="text-teal-400 pl-2 pb-2">
+                {previousMessage || "No previous message"}
+            </span>
             My Secret Message:
-            <span className="text-teal-400 pl-2">{currentMessage || "No message yet."}</span>  {/* Display the current message */}
+            <span className="text-teal-400 pl-2">
+                {currentMessage || "No message yet."}
+            </span>
         </div>
     );
 }

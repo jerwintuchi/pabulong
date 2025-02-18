@@ -18,13 +18,19 @@ export default function SecretPage3Client({ user }: SecretPage3ClientProps) {
     const [allUsers, setAllUsers] = useState<{ id: string; user_id: string; username: string; email: string; secret_message: string }[] | null>(null);
     const [loading, setLoading] = useState(true);
 
+    // Debug log to check incoming user data
     useEffect(() => {
-        if (!user) return; // Skip if the user is not available
+        console.log('User data received:', user);
+        console.log('Friends data:', user?.friends);
+    }, [user]);
+
+    useEffect(() => {
+        if (!user) return;
 
         const fetchUsers = async () => {
-            setLoading(true); // Start loading
+            setLoading(true);
             try {
-                const users = await getAllUsers(); // Fetch users
+                const users = await getAllUsers();
                 const usersList = users?.map(user => ({
                     id: user.id,
                     user_id: user.user_id ?? "",
@@ -32,28 +38,34 @@ export default function SecretPage3Client({ user }: SecretPage3ClientProps) {
                     email: user.email ?? "",
                     secret_message: user.secret_message ?? "",
                 })) ?? [];
-                setAllUsers(usersList); // Set the fetched users
+                setAllUsers(usersList);
             } catch (error) {
-                console.error("Error fetching all users:", error); // Improved error handling
+                console.error("Error fetching all users:", error);
             } finally {
-                setLoading(false); // Stop loading
+                setLoading(false);
             }
         };
 
-        fetchUsers(); // Fetch users on mount or when `user` changes
+        fetchUsers();
     }, [user]);
 
-    // Users to add (pending friend requests excluding the current user)
+    // Debug log when selected friend changes
+    useEffect(() => {
+        if (selectedFriend) {
+            const friend = user?.friends?.find(f => f.user_id === selectedFriend);
+            console.log('Selected friend data:', friend);
+        }
+    }, [selectedFriend, user?.friends]);
+
     const usersToAdd = (user?.pendingRequests || [])
         .filter((username): username is string => username !== null && username !== user.username);
 
-    // Friends List
     const friends = user?.friends || [];
 
-    // Selected friend's secret message
+    // Debug log to check message retrieval
     const selectedFriendMessage = friends.find(friend => friend.user_id === selectedFriend)?.secret_message;
+    console.log('Selected friend message:', selectedFriendMessage);
 
-    // Filtered users excluding the current user
     const filteredUsers = allUsers?.filter(u => u.user_id !== user?.user?.id) ?? [];
 
     return (
@@ -62,20 +74,23 @@ export default function SecretPage3Client({ user }: SecretPage3ClientProps) {
                 Secret Page 3
             </h1>
 
-            {/* Card 1: Users to Add */}
+            {/* Debug section */}
+            <div className="hidden">
+                <pre>{JSON.stringify(user?.friends, null, 2)}</pre>
+            </div>
+
             <FriendRequest usersToAdd={usersToAdd} />
-
-            {/* Card 2: Friends List */}
-            <FriendList friends={friends} setSelectedFriend={setSelectedFriend} allUsers={filteredUsers} />
-
-            {/* Card 3: Friend's Secret Message */}
+            <FriendList
+                friends={friends}
+                setSelectedFriend={setSelectedFriend}
+                allUsers={filteredUsers}
+            />
             <FriendMessage
                 selectedFriend={selectedFriend}
                 selectedFriendMessage={selectedFriendMessage}
                 allUsers={filteredUsers}
             />
 
-            {/* Card 4: Scrollable List of All Users (excluding current user) */}
             {filteredUsers.length > 0 ? (
                 <ScrollableUserList users={filteredUsers} friends={friends} />
             ) : (

@@ -5,10 +5,12 @@ import { getServerUser } from "@/utils/helpers/user-server";
 
 // The HomePage component
 export default async function HomePage() {
-    const user = await getServerUser();
-    // Check user authentication state
+    const user = await getServerUser({
+        includeSecretMessage: true,
+        includeFriends: true,
+        includePendingRequests: true,
+        includeFriendsMessages: true
+    });
     const isAuthenticated = user;
-
-    // Pass user data to HomePageClient to avoid refetching
     return isAuthenticated ? <HomePageClient user={user} /> : <Home />;
 }
