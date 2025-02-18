@@ -65,14 +65,14 @@ export type Database = {
             columns: ["friend_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "friendships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -111,6 +111,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_existing_email: {
+        Args: {
+          user_email: string
+        }
+        Returns: boolean
+      }
+      check_username_availability: {
+        Args: {
+          user_username: string
+        }
+        Returns: boolean
+      }
       delete_own_account: {
         Args: Record<PropertyKey, never>
         Returns: boolean

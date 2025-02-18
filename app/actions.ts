@@ -6,78 +6,127 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
-  const username = formData.get("username")?.toString()?.trim();
+  const username = formData.get("username")?.toString();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
-  // Check if username is unique
+  const origin = (await headers()).get("origin");
+
+  console.log("Sign-Up Attempt:", { username, email });
+
   if (!username) {
+    console.log("Missing Username");
     return encodedRedirect("error", "/sign-up", "Username is required");
   }
-  const { data: existingUser, error: userNameError } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("username", username)
-    .single();
 
-  if (existingUser) {
+  //  Check if username already exists
+  const { data: isUsernameAvailable, error: usernameError } =
+    await supabase.rpc("check_username_availability", {
+      user_username: username,
+    });
+
+  console.log("🔍 Username Availability Check:", {
+    isUsernameAvailable,
+    usernameError,
+  });
+
+  if (usernameError) {
+    console.error("Error checking username:", usernameError);
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "An error occurred, please try again."
+    );
+  }
+
+  if (!isUsernameAvailable) {
+    console.log("Username already exists");
     return encodedRedirect(
       "error",
       "/sign-up",
       "That username is already taken, try another one."
     );
   }
-  console.log(existingUser);
 
-  if (!username || username.length > 12) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Username must be 12 characters or less"
-    );
-  }
   if (!email || !password) {
+    console.log("Missing Email or Password");
     return encodedRedirect(
       "error",
       "/sign-up",
       "Email and password are required"
     );
   }
-  //if there is already an existing email
-  const { data: existingEmail, error: existingEmailError } = await supabase
-    .from("profiles")
-    .select("email")
-    .eq("email", email)
-    .single();
 
-  if (existingEmail) {
+  if (username.length > 12) {
+    console.log("Username Too Long");
     return encodedRedirect(
       "error",
       "/sign-up",
-      "That email is already in use, try another one."
+      "Username must be 12 characters or less"
     );
   }
 
-  const { error, data } = await supabase.auth.signUp({ email, password });
+  // Check if email already exists in profiles
+  const { data: existingProfile, error: profileError } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
 
-  if (!data) {
-    return encodedRedirect("error", "/sign-up", "Something went wrong");
+  console.log("🔍 Email Check in Profiles:", { existingProfile, profileError });
+
+  if (existingProfile) {
+    console.log("Email already exists in profiles");
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "That email is already taken, try another one."
+    );
   }
 
-  const { error: userError } = await supabase.from("profiles").insert([
-    {
-      username,
-      user_id: data.user?.id,
-      email,
+  //  Check if email exists in auth.users
+  const { data: existingUser, error: existingUserError } = await supabase.rpc(
+    "check_existing_email",
+    { user_email: email }
+  );
+
+  console.log("🔍 Email Check in auth.users:", {
+    existingUser,
+    existingUserError,
+  });
+
+  if (existingUser) {
+    console.log("Email already exists in auth.users");
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "That email is already taken, try another one."
+    );
+  }
+
+  // Try signing up
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+      data: { username },
     },
-  ]);
+  });
 
-  if (userError) {
-    console.error(userError.code + " " + userError.message);
-    return encodedRedirect("error", "/sign-up", userError.message);
+  console.log("🔍 Supabase Sign-Up Response:", { data, error });
+
+  if (error) {
+    console.log("Supabase Sign-Up Error:", error.message);
+    return encodedRedirect("error", "/sign-up", error.message);
   }
 
-  return redirect("/");
+  console.log("Sign-Up Successful");
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {

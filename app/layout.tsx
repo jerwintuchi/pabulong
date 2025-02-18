@@ -5,7 +5,6 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import Header from "@/components/Header";
 import { Toaster } from "react-hot-toast";
-import { UserProvider } from "@/contexts/UserContext";
 
 
 const defaultUrl = process.env.VERCEL_URL
@@ -25,30 +24,27 @@ export default function RootLayout({
 }>) {
 
   return (
+    <html lang="en" className={geistSans.className} suppressHydrationWarning>
+      <body className="bg-background text-foreground">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Toaster position="top-center" reverseOrder={false} />
+          <main className="min-h-screen flex flex-col items-center w-full">
+            <div className="flex-1 w-full flex flex-col gap-20 items-center">
+              <Header />
 
-    <UserProvider>
-      <html lang="en" className={geistSans.className} suppressHydrationWarning>
-        <body className="bg-background text-foreground">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <Toaster position="top-center" reverseOrder={false} />
-            <main className="min-h-screen flex flex-col items-center w-full">
-              <div className="flex-1 w-full flex flex-col gap-20 items-center">
-                <Header />
-
-                {/* Main Content */}
-                <div className="flex flex-col max-w-5xl p-5">
-                  {children}
-                </div>
+              {/* Main Content */}
+              <div className="flex flex-col max-w-5xl p-5">
+                {children}
               </div>
-            </main>
-          </ThemeProvider>
-        </body >
-      </html ></UserProvider>
-
+            </div>
+          </main>
+        </ThemeProvider>
+      </body >
+    </html >
   );
 }
