@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 
 export const mockCookies = vi.fn(() => ({
+  get: vi.fn(() => "some-cookie-value"),
   getAll: vi.fn(() => []),
   set: vi.fn(),
   delete: vi.fn(),

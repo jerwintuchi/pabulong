@@ -28,7 +28,7 @@ export const getCachedUsername = cache(async () => {
 });
 
 // Interface for specifying which data to fetch
-interface UserDataOptions {
+export interface UserDataOptions {
   includeSecretMessage?: boolean;
   includeFriends?: boolean;
   includePendingRequests?: boolean;
@@ -55,10 +55,9 @@ export async function getServerUser(options: UserDataOptions = {}) {
       secret_message: null,
     }));
 
-    // If we need friend messages, fetch them immediately after getting friends
     if (options.includeFriendsMessages) {
       const friendsMessages = await getFriendsSecretMessages();
-      // Ensure we're properly matching and assigning messages
+      // Ensure  properly matching and assigning messages
       userData.friends = userData.friends.map((friend: any) => {
         const message = friendsMessages.find(
           (msg: any) => msg.user_id === friend.user_id
