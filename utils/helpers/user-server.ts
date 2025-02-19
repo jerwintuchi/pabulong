@@ -1,5 +1,6 @@
+// utils/helpers/user-server.ts
 "use server";
-
+import { cache } from "react";
 import { createClient } from "@/utils/supabase/server";
 import {
   getUserName,
@@ -8,7 +9,6 @@ import {
   getPendingFriendRequests,
   getFriendsSecretMessages,
 } from "../queries/queryDefinitions";
-import { cache } from "react";
 
 // Cache the basic user authentication check
 export const getBasicUser = cache(async () => {
@@ -17,7 +17,6 @@ export const getBasicUser = cache(async () => {
     data: { user },
     error,
   } = await supabase.auth.getUser();
-
   if (error || !user) return null;
   return user;
 });
@@ -27,7 +26,6 @@ export const getCachedUsername = cache(async () => {
   return getUserName();
 });
 
-// Interface for specifying which data to fetch
 export interface UserDataOptions {
   includeSecretMessage?: boolean;
   includeFriends?: boolean;
@@ -35,47 +33,65 @@ export interface UserDataOptions {
   includeFriendsMessages?: boolean;
 }
 
-// Main function to fetch user data with options
+// Optimized function to fetch user data with parallel requests
 export async function getServerUser(options: UserDataOptions = {}) {
-  const user = await getBasicUser();
-  if (!user) return null;
+  const [user, username] = await Promise.all([
+    getBasicUser(),
+    getCachedUsername(),
+  ]);
 
-  const username = await getCachedUsername();
+  if (!user) return null;
 
   const userData: any = {
     user,
     username,
   };
 
-  // Get friends data first if we need either friends or their messages
-  if (options.includeFriends || options.includeFriendsMessages) {
-    const friendsRaw = await getUserFriends();
-    userData.friends = friendsRaw.map((friendId: string | null) => ({
-      user_id: friendId,
-      secret_message: null,
-    }));
-
-    if (options.includeFriendsMessages) {
-      const friendsMessages = await getFriendsSecretMessages();
-      // Ensure  properly matching and assigning messages
-      userData.friends = userData.friends.map((friend: any) => {
-        const message = friendsMessages.find(
-          (msg: any) => msg.user_id === friend.user_id
-        );
-        return {
-          ...friend,
-          secret_message: message ? message.secret_message : null,
-        };
-      });
-    }
-  }
+  // Create an array of promises for parallel execution
+  const promises = [];
 
   if (options.includeSecretMessage) {
-    userData.secretMessage = await getSecretMessage();
+    promises.push(
+      getSecretMessage().then((message) => {
+        userData.secretMessage = message;
+      })
+    );
+  }
+
+  if (options.includeFriends || options.includeFriendsMessages) {
+    promises.push(
+      getUserFriends().then((friendsRaw) => {
+        userData.friends = friendsRaw.map((friendId: string | null) => ({
+          user_id: friendId,
+          secret_message: null,
+        }));
+      })
+    );
   }
 
   if (options.includePendingRequests) {
-    userData.pendingRequests = await getPendingFriendRequests();
+    promises.push(
+      getPendingFriendRequests().then((requests) => {
+        userData.pendingRequests = requests;
+      })
+    );
+  }
+
+  // Wait for all promises to resolve
+  await Promise.all(promises);
+
+  // Get friends messages separately if needed (depends on friends data)
+  if (options.includeFriendsMessages && userData.friends) {
+    const friendsMessages = await getFriendsSecretMessages();
+    userData.friends = userData.friends.map((friend: any) => {
+      const message = friendsMessages.find(
+        (msg: any) => msg.user_id === friend.user_id
+      );
+      return {
+        ...friend,
+        secret_message: message ? message.secret_message : null,
+      };
+    });
   }
 
   return userData;

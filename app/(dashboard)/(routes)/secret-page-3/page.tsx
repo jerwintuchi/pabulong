@@ -7,7 +7,7 @@ import SecretPage3Client from "./_components/SecretPage3Client";
 export default async function Page() {
     const user = await getServerUser({
         includeSecretMessage: true,
-        includeFriends: true,           // Added this to ensure we have the friends array
+        includeFriends: true,           // to ensurethe friends array
         includePendingRequests: true,   // Needed for friend requests
         includeFriendsMessages: true
     });
