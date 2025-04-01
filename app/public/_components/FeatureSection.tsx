@@ -5,7 +5,7 @@ const FeatureSection = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black ">
                     <h3 className="text-xl font-semibold mb-4">Secure & Private</h3>
-                    <p>We prioritize your privacy. All messages are encrypted, ensuring that only you and your recipient can read them.</p>
+                    <p>We prioritize your privacy. All messages with friends only, can be shared.</p>
                 </div>
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black">
                     <h3 className="text-xl font-semibold mb-4">Message Self-Destruction</h3>
