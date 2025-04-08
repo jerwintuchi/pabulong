@@ -9,7 +9,7 @@ const FeatureSection = () => {
                 </div>
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black">
                     <h3 className="text-xl font-semibold mb-4">Message Self-Destruction</h3>
-                    <p>Messages disappear once read, leaving no trace behind. Perfect for confidential conversations.</p>
+                    <p>Share secret messages with friends that you have added!</p>
                 </div>
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black">
                     <h3 className="text-xl font-semibold mb-4">No Traces Left</h3>
