@@ -8,12 +8,12 @@ const FeatureSection = () => {
                     <p>We prioritize your privacy. All messages with friends only, can be shared.</p>
                 </div>
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black">
-                    <h3 className="text-xl font-semibold mb-4">Message Self-Destruction</h3>
-                    <p>Share secret messages with friends that you have added!</p>
+                    <h3 className="text-xl font-semibold mb-4">Simple Messaging</h3>
+                    <p>A straightforward way to send and receive messages with your added friends.</p>
                 </div>
                 <div className="p-6 dark:bg-gray-900 rounded-lg shadow-lg text-white bg-black">
-                    <h3 className="text-xl font-semibold mb-4">No Traces Left</h3>
-                    <p>After messages are read, they vanish, leaving no digital footprint, ensuring your secrets remain safe.</p>
+                    <h3 className="text-xl font-semibold mb-4">Stay in Touch</h3>
+                    <p>Keep up with your friends by sending them messages directly through the app.</p>
                 </div>
             </div>
         </section>
